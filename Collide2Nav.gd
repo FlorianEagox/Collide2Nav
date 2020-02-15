@@ -15,8 +15,8 @@ var selected_node: NavigationPolygonInstance
 func _enter_tree() -> void:
 	editor_selection.connect("selection_changed", self, "selection_changed") # Connect an event when the user selects a node in their scene tree
 	btnGenerate = ToolButton.new()
-	btnGenerate.text = "Generate from bodies"
-	btnGenerate.hint_tooltip = "Generate from bodies"
+	btnGenerate.text = "Generate from Bodies"
+	btnGenerate.hint_tooltip = "Generate from Bodies"
 	btnGenerate.name = "btnGenerate"
 	btnGenerate.connect("pressed", self, "generate")
 	#nav_toolbar = get_node(nav_toolbar_path)
