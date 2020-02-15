@@ -40,15 +40,26 @@ func _exit_tree() -> void:
 
 func generate():
 	print("Generating Mesh...")
-	var bodies = [] # All of the static bodies in the scene
-	get_of_type(get_editor_interface().get_edited_scene_root(), StaticBody2D, bodies) # Get every static body in the curently edited scene
-	print(bodies)
+	var shapes = [] # All of the collision polygons in the scene
+	get_of_type(get_editor_interface().get_edited_scene_root(), CollisionPolygon2D, shapes) # Get every collision polygon in the curently edited scene
+	var mesh = NavigationPolygon.new()
+	var outline = [Vector2(0, 0), Vector2(0, 600), Vector2(1000, 600), Vector2(1000, 0)]
+	mesh.add_outline(outline)
+	for shape in shapes:
+		var points = shape.polygon
+		print(shape)
+		for i in range(points.size()):
+			points[i] += shape.get_parent().position + shape.position
+		mesh.add_outline(points)
+	mesh.make_polygons_from_outlines()
+	mesh.clear_outlines()
+	selected_node.navpoly = mesh
 
 # This function will recurse through every child of root, and if the child is of type type, add it to the referenced found_objects array
 func get_of_type(root: Node, type, found_objects):
 	for node in root.get_children():
 		if node is type:
-			found_objects.append(root)
+			found_objects.append(node)
 		get_of_type(node, type, found_objects)
 
 
