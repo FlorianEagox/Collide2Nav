@@ -1,3 +1,5 @@
+# Plugin by Seth Painter (TheFoxarmy)
+
 tool
 extends EditorPlugin
 
@@ -21,14 +23,14 @@ func _enter_tree() -> void:
 
 func selection_changed():
 	var nodes = editor_selection.get_selected_nodes() # Get the nodes they selected
-	if nodes.size() == 1 and nodes[0] is NavigationPolygonInstance: # If they only selected one, and it's a mesh
+	if nodes.size() == 1 and nodes[0] is NavigationPolygonInstance: # If they only selected one, and it's a nav poly
 		if not btnGenerate.get_parent(): # if the button hasn't been added yet
 			selected_node = nodes[0]
 			add_control_to_container(CONTAINER_CANVAS_EDITOR_MENU, btnGenerate) # add it to the menu
 			# nav_toolbar.add_child(btnGenerate)
 	else:
 		if btnGenerate.get_parent(): # If we've added it before
-			remove_control_from_container(CONTAINER_CANVAS_EDITOR_MENU, btnGenerate) # Remove the button when we're not editing a mesh
+			remove_control_from_container(CONTAINER_CANVAS_EDITOR_MENU, btnGenerate) # Remove the button when we're not editing a nav poly
 
 func get_plugin_name() -> String:
 	return "Collide2Nav"
@@ -40,10 +42,10 @@ func _exit_tree() -> void:
 	#nav_toolbar.remove_child(btnGenerate)
 
 func generate():
-	print("Generating Mesh...")
+	print("Generating Nav Poly...")
 	root = get_editor_interface().get_edited_scene_root()
 
-	var mesh = NavigationPolygon.new()
+	var navpoly = NavigationPolygon.new()
 
 	# Our goal is to find the top leftest corner and bottom rightest corner of all the tilmaps so we are encompassing everything.
 	var maps = []
@@ -67,20 +69,20 @@ func generate():
 				map_bounds_max.y = origin.y + map_size.y
 		
 		# Creating a rectangle with the bounds of the tilemaps to be our base nav polygon
-		mesh.add_outline([map_bounds_min, Vector2(map_bounds_max.x, map_bounds_min.y), map_bounds_max, Vector2(map_bounds_min.x, map_bounds_max.y)])
+		navpoly.add_outline([map_bounds_min, Vector2(map_bounds_max.x, map_bounds_min.y), map_bounds_max, Vector2(map_bounds_min.x, map_bounds_max.y)])
 		
 	var shapes = [] # All of the collision polygons in the scene
 	get_of_type(root, CollisionPolygon2D, shapes) # Get every collision polygon in the curently edited scene
 	
 	for shape in shapes: # Go through every shape and generate a nav polygon
-		# We need to offset the mesh points to the same as the collission polygon points
+		# We need to offset the navpoly points to the same as the collission polygon points
 		var points = shape.polygon
 		for i in range(points.size()):
 			points[i] += shape.get_parent().position + shape.position
-		mesh.add_outline(points)
-	mesh.make_polygons_from_outlines()
-	mesh.clear_outlines()
-	selected_node.navpoly = mesh # Set the scene's polymeshinstance to the one we just created
+		navpoly.add_outline(points)
+	navpoly.make_polygons_from_outlines()
+	navpoly.clear_outlines()
+	selected_node.navpoly = navpoly # Set the scene's navpolyinstance to the one we just created
 
 # This function will recurse through every child of root, and if the child is of type type, add it to the referenced found_objects array
 func get_of_type(root: Node, type, found_objects):
